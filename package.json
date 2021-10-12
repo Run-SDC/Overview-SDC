@@ -1,0 +1,23 @@
+{
+  "name": "overview-sdc",
+  "version": "1.0.0",
+  "description": "",
+  "main": "server.js",
+  "scripts": {
+    "test": "jest --verbose --coverage"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Run-SDC/Overview-SDC.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Run-SDC/Overview-SDC/issues"
+  },
+  "homepage": "https://github.com/Run-SDC/Overview-SDC#readme",
+  "dependencies": {
+    "express": "^4.17.1",
+    "jest": "^27.2.5"
+  }
+}
