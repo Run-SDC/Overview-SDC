@@ -1,11 +1,12 @@
+/* eslint-disable max-len */
 /* eslint-disable no-console */
 /* eslint-disable no-unused-vars */
 const mongoose = require('mongoose');
 
 const { Schema } = mongoose;
-const db = mongoose.createConnection('mongodb://localhost/overview');
+mongoose.connect('mongodb://localhost:27017/overview');
 
-const product = new Schema({
+const products = mongoose.Schema({
   id: String,
   name: String,
   slogan: String,
@@ -14,28 +15,18 @@ const product = new Schema({
   default_price: String,
 }, { collection: 'product' });
 
-const feature = new Schema({
+const Product = mongoose.model('products', products);
+
+const features = mongoose.Schema({
   id: String,
   product_id: String,
   feature: String,
   value: String,
 }, { collection: 'features' });
 
-const photo = new Schema({
-  id: String,
-  styleId: String,
-  url: String,
-  thumbnail_url: String,
-}, { collection: 'photos' });
+const Feature = mongoose.model('features', features);
 
-const sku = new Schema({
-  id: String,
-  styleId: String,
-  size: String,
-  quantity: String,
-}, { collection: 'skus' });
-
-const style = new Schema({
+const styles = mongoose.Schema({
   id: String,
   productId: String,
   name: String,
@@ -44,22 +35,73 @@ const style = new Schema({
   default_style: String,
 }, { collection: 'styles' });
 
-const Product = db.model('Product', product);
-const Style = db.model('Style', style);
-const Sku = db.model('Sku', sku);
-const Photo = db.model('Photo', photo);
-const Feature = db.model('Feature', feature);
+const Style = mongoose.model('styles', styles);
 
-// make a query to all products with an optional id parameter
+const photos = mongoose.Schema({
+  id: String,
+  styleId: String,
+  url: String,
+  thumbnail_url: String,
+});
+
+const Photo = mongoose.model('photos', photos);
+
+const skus = mongoose.Schema({
+  id: String,
+  styleId: String,
+  size: String,
+  quantity: String,
+}, { collection: 'skus' });
+
+const Sku = mongoose.model('skus', skus);
+
+const styleswithphotosandskus = mongoose.Schema({
+  id: String,
+  productId: String,
+  name: String,
+  sale_price: String,
+  original_price: String,
+  'default?': String,
+  photos: [photos],
+  skus: {
+    type: Map,
+    of: skus,
+  },
+}, { collection: 'styleswithphtosandskus' });
+
+const StylesWithPhotosAndSkus = mongoose.model('styleswithphotosandskus', styleswithphotosandskus);
+
+const productinfo = mongoose.Schema({
+  id: String,
+  name: String,
+  slogan: String,
+  description: String,
+  category: String,
+  default_price: String,
+  features: [features],
+}, { collection: 'productinfo' });
+
+const ProductInformation = mongoose.model('productinfo', productinfo);
+
+const getProductsWithSupressedFeatures = (count = 5) => ProductInformation.find({}, { _id: 0, features: 0 }).limit(count).exec();
+
 const getProducts = (id, count = 5) => {
   // if id is not provided, return all products and dont include _id
   if (!id) {
     // find all products
-    return Product.find({}, { _id: 0 }).limit(count).exec();
+    return getProductsWithSupressedFeatures(count);
   }
-  return Product.find({ id }, { _id: 0 }).limit(count).exec();
+  return ProductInformation.find({ product_id: id }, { _id: 0 }).limit(count).exec();
 };
+
+const getStylesWithPhotosAndSkus = (Id) => StylesWithPhotosAndSkus.find({ productId: Id }, { _id: 0 }).exec();
+
+// getStylesWithPhotosAndSkus('1').then((styles3) => {
+//   console.log(styles3);
+// });
 
 module.exports = {
   getProducts,
+  getStylesWithPhotosAndSkus,
+  getProductsWithSupressedFeatures,
 };
