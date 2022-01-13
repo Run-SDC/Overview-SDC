@@ -4,7 +4,7 @@
 const mongoose = require('mongoose');
 
 const { Schema } = mongoose;
-mongoose.connect('mongodb://localhost:27017/overview');
+mongoose.connect('mongodb://trevoroverview:123@18.119.129.194:27017/overview');
 
 const products = mongoose.Schema({
   id: String,
