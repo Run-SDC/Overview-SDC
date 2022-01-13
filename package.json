@@ -33,6 +33,7 @@
     "mongoose": "^6.0.11",
     "nodemon": "^2.0.14",
     "nyc": "^15.1.0",
+    "path": "^0.12.7",
     "supertest": "^6.1.6"
   },
   "devDependencies": {
