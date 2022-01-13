@@ -2,9 +2,10 @@
 /* eslint-disable no-console */
 /* eslint-disable no-unused-vars */
 const mongoose = require('mongoose');
+require('dotenv').config();
 
 const { Schema } = mongoose;
-mongoose.connect('mongodb://trevoroverview:123@18.119.129.194:27017/overview');
+mongoose.connect(process.env.MONGO_URI);
 
 const products = mongoose.Schema({
   id: String,
