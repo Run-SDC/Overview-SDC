@@ -11,7 +11,9 @@
 
 const express = require('express');
 const path = require('path');
+const memjs = require('memjs');
 
+const client = memjs.Client.create();
 // eslint-disable-next-line import/extensions
 const {
   getProducts, getStylesWithPhotosAndSkus, getProductsWithSupressedFeatures,
@@ -20,12 +22,12 @@ const {
 const app = express();
 app.use(express.static('Public'));
 
-app.get("/loaderio-1592abcdd1d200cc43f378b33cc5497b.txt", (req, res, next) => {
+app.get("/loaderio-ca850dd55bc29479fb6d4e83a3e646bf.txt", (req, res, next) => {
   const options = {
     root: path.join(__dirname),
   };
 
-  const fileName = "loaderio-1592abcdd1d200cc43f378b33cc5497b";
+  const fileName = "loaderio-ca850dd55bc29479fb6d4e83a3e646bf.txt";
   res.sendFile(fileName, options, (err) => {
     if (err) {
       next(err);
@@ -42,8 +44,23 @@ app.get('/products', (req, res) => {
 });
 
 app.get('/products/:product_id', (req, res) => {
+  // check if product_id is in memcached
+  client.get(`product_${req.params.product_id}`, (err, value) => {
+    if (err) {
+      console.log(err);
+    } else {
+      res.send(value).status(200);
+    }
+  });
   getProducts(req.params.product_id)
     .then((product) => {
+      client.set(`product_${req.params.product_id}`, JSON.stringify(product), (err) => {
+        if (err) {
+          console.log(err);
+        } else {
+          console.log('Product was added to memcached');
+        }
+      });
       res.send(product).status(200);
     });
 });
@@ -53,8 +70,23 @@ app.get('/products/:product_id/styles', (req, res) => {
     product_id: req.params.product_id,
     results: [],
   };
+  client.get(`product_${req.params.product_id}/styles`, (err, value) => {
+    if (err) {
+      console.log(err);
+    } else {
+      container.results.push(value);
+      res.send(container).status(200);
+    }
+  });
   getStylesWithPhotosAndSkus(req.params.product_id)
     .then((styles) => {
+      client.set(`product_${req.params.product_id}`, JSON.stringify(styles), (err) => {
+        if (err) {
+          console.log(err);
+        } else {
+          console.log('Product was added to memcached');
+        }
+      });
       container.results.push(styles);
       // console.log('container: ', container.results[0]);
       res.send(container).status(200);
